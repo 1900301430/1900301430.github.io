@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://1900301430.github.io</id>
-    <title>Gridea</title>
-    <updated>2020-11-15T05:23:25.279Z</updated>
+    <title>Blog of Yep.</title>
+    <updated>2020-11-15T05:25:50.956Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://1900301430.github.io"/>
     <link rel="self" href="https://1900301430.github.io/atom.xml"/>
     <subtitle>Just A Blog</subtitle>
     <logo>https://1900301430.github.io/images/avatar.png</logo>
     <icon>https://1900301430.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, Gridea</rights>
+    <rights>All rights reserved 2020, Blog of Yep.</rights>
     <entry>
         <title type="html"><![CDATA[网络渗透测试实验一——网络扫描与网络侦察]]></title>
         <id>https://1900301430.github.io/post/wang-luo-shen-tou-ce-shi-shi-yan-yi-wang-luo-sao-miao-yu-wang-luo-zhen-cha/</id>
