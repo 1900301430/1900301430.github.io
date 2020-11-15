@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://1900301430.github.io</id>
     <title>1900301430&apos;s Blog.</title>
-    <updated>2020-11-15T08:54:25.697Z</updated>
+    <updated>2020-11-15T08:59:55.368Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://1900301430.github.io"/>
     <link rel="self" href="https://1900301430.github.io/atom.xml"/>
@@ -72,13 +72,17 @@ Serving Cell info–&gt;LAC=Tracking Area Code --&gt;cellid = Cell identity<br>
 <h3 id="62-扫描操作系统">6.2 扫描操作系统</h3>
 <p>利用NMAP扫描Metasploitable2的操作系统类型，并附截图。</p>
 <figure data-type="image" tabindex="5"><img src="https://img-blog.csdnimg.cn/20201101230706665.png#pic_center" alt="6.2" loading="lazy"></figure>
-<p>使用nmap -O IP 即可查看操作系统类型。</p>
+<p>使用</p>
+<pre><code>nmap -O IP
+</code></pre>
+<p>即可查看操作系统类型。</p>
 <h3 id="63-穷举登录账号密码">6.3 穷举登录账号密码</h3>
 <p>利用NMAP穷举 Metasploitable2上dvwa的登录账号和密码。</p>
 <p>经查找知dvwa是网页服务器，所以它应该在80（http）端口。<br>
 利用NMAP的http暴力破解脚本<strong>http-form-brute</strong>爆破/dvwa/login.php即可得到账号admin和密码password。</p>
 <p>其命令为：</p>
-<p>nmap -p80 --script=http-form-brute --script-args=http-form-brute.path=/dvwa/login.php IP。</p>
+<pre><code>nmap -p80 --script=http-form-brute --script-args=http-form-brute.path=/dvwa/login.php IP
+</code></pre>
 <h3 id="64-wannacry相关信息">6.4 WannaCry相关信息</h3>
 <p>查阅资料，永恒之蓝-WannaCry蠕虫利用漏洞的相关信息。</p>
 <p><strong>ETERNALROMANCE</strong>：</p>
