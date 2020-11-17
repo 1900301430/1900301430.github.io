@@ -1,0 +1,311 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>网络渗透测试实验二——网络嗅探与身份认证 | 1900301430&#39;s Blog.</title>
+<link rel="shortcut icon" href="https://1900301430.github.io/favicon.ico?v=1605594664272">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://1900301430.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="网络渗透测试实验二——网络嗅探与身份认证 | 1900301430&#39;s Blog. - Atom Feed" href="https://1900301430.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="网络渗透测试实验二——网络嗅探与身份认证
+实验目的：
+1.通过使用Wireshark软件掌握Sniffer（嗅探器）工具的使用方法，实现捕捉HTTP等协议的数据包，以理解TCP/IP协议中多种协议的数据结构、通过实验了解HTTP等协议明文传..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://1900301430.github.io">
+  <img class="avatar" src="https://1900301430.github.io/images/avatar.png?v=1605594664272" alt="">
+  </a>
+  <h1 class="site-title">
+    1900301430&#39;s Blog.
+  </h1>
+  <p class="site-description">
+    Just A Blog
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              网络渗透测试实验二——网络嗅探与身份认证
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-11-17
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h1 id="网络渗透测试实验二网络嗅探与身份认证">网络渗透测试实验二——网络嗅探与身份认证</h1>
+<h2 id="实验目的">实验目的：</h2>
+<p>1.通过使用Wireshark软件掌握Sniffer（嗅探器）工具的使用方法，实现捕捉HTTP等协议的数据包，以理解TCP/IP协议中多种协议的数据结构、通过实验了解HTTP等协议明文传输的特性。<br>
+2.研究交换环境下的网络嗅探实现及防范方法，研究并利用ARP协议的安全漏洞，通过Arpspoof实现ARP欺骗以捕获内网其他用户数据。<br>
+3.能利用BrupSuite实现网站登录暴力破解获得登录密码。<br>
+4.能实现ZIP密码破解，理解安全密码的概念和设置。</p>
+<h2 id="系统环境">系统环境</h2>
+<p>Kali Linux 2、Windows</p>
+<h2 id="网络环境">网络环境</h2>
+<p>交换网络结构</p>
+<h2 id="实验工具">实验工具</h2>
+<p>Arpspoof、WireShark、BurpSuite、fcrackzip（用于zip密码破解）。</p>
+<h1 id="实验步骤和内容">实验步骤和内容</h1>
+<h2 id="网络嗅探部分">网络嗅探部分：</h2>
+<p>网络嗅探：Wireshark 监听网络流量，抓包。<br>
+ARP欺骗： ArpSpoof，实施ARP欺骗。<br>
+防范： 防范arp欺骗。<br>
+<img src="https://img-blog.csdnimg.cn/20201114110309699.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="实验网络拓扑" loading="lazy"></p>
+<h2 id="1a主机上外网b运行sinfferwireshark选定只抓源为a的数据">1.A主机上外网，B运行sinffer(Wireshark)选定只抓源为A的数据)。</h2>
+<h3 id="11-写出以上过滤语句">1.1 写出以上过滤语句。</h3>
+<pre><code>ip.src==(A的IP)
+</code></pre>
+<h3 id="12-b是否能看到a和外网的通信a刚输入的帐户和口令为什么">1.2 B是否能看到A和外网的通信（A刚输入的帐户和口令）？为什么？</h3>
+<p>B是能看到A和外网的通信的。</p>
+<h2 id="2">2.</h2>
+<h3 id="21-为了捕获a到外网的数据b实施arp欺骗攻击b将冒充该子网的什么实体">2.1 为了捕获A到外网的数据，B实施ARP欺骗攻击，B将冒充该子网的什么实体？</h3>
+<p>B将冒充该子网的<strong>网关</strong>。</p>
+<h3 id="22-写出arpspoof命令格式">2.2 写出arpspoof命令格式。</h3>
+<p>将kali伪装成网关</p>
+<pre><code>arpspoof -i eth0 -t （被骗主机IP）  （网关IP）
+</code></pre>
+<h3 id="23-b是否能看到a和外网的通信a刚输入的帐户和口令">2.3 B是否能看到A和外网的通信（A刚输入的帐户和口令）？</h3>
+<p>B是能看到A和外网的通信的。图见下一题。</p>
+<h3 id="24-在互联网上找到任意一个以明文方式传递用户帐号-密码的网站截图wireshark中显示的明文信息">2.4 在互联网上找到任意一个以明文方式传递用户帐号、密码的网站，截图Wireshark中显示的明文信息。</h3>
+<p>这里我利用新kali（IP为192.168.134.128）对旧kali（IP为192.168.134.130）进行ARP欺骗。<br>
+网关为192.168.134.1。<br>
+先开启IP转发</p>
+<pre><code>echo 1 &gt;/proc/sys/net/ipv4/ip_forward
+</code></pre>
+<p>接着</p>
+<pre><code>arpspoof -i eth0 -t 192.168.134.130 192.168.134.1
+</code></pre>
+<p>欺骗成功后，新kali开启WireShark抓包。<br>
+这里以登录某网站为例（隐私信息已匿）。<br>
+登陆成功后，返回查看新kali上WireShark抓到的包。<br>
+其明文信息显示如下。<br>
+<img src="https://img-blog.csdnimg.cn/20201115212035584.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="2.4" loading="lazy"></p>
+<h2 id="3-ftp数据还原部分利用wireshark打开实验实验数据datapcapng">3. FTP数据还原部分：利用WireShark打开实验实验数据data.pcapng。</h2>
+<h3 id="31-ftp服务器的ip地址是多少你是如何发现其为ftp服务器的">3.1 FTP服务器的IP地址是多少？你是如何发现其为FTP服务器的？</h3>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20201114112959865.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="3.1" loading="lazy"></figure>
+<p>192.168.182.1，此IP是作为Source来提供Response的一方。</p>
+<h3 id="32客户端登录ftp服务器的账号和密码分别是什么">3.2客户端登录FTP服务器的账号和密码分别是什么?</h3>
+<figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/20201114112724663.png#pic_center" alt="3.2" loading="lazy"></figure>
+<p>不难看出登录FTP服务器的账号student和密码sN46i5y。</p>
+<h3 id="33-客户端从ftp下载或查看了2个文件一个为zip文件一个为txt文件文件名分别是什么提示文件名有可能是中文">3.3 客户端从FTP下载或查看了2个文件，一个为ZIP文件，一个为TXT文件，文件名分别是什么？提示：文件名有可能是中文。</h3>
+<figure data-type="image" tabindex="3"><img src="https://img-blog.csdnimg.cn/20201114113232669.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="3.3" loading="lazy"></figure>
+<p>1.zip<br>
+复习题.txt</p>
+<h3 id="34-还原zip文件并打开zip有解压密码试图破解提示密码全为数字并为6位-截图破解过程">3.4 还原ZIP文件并打开（ZIP有解压密码，试图破解，提示：密码全为数字，并为6位）。截图破解过程。</h3>
+<p>使用WireShark找到其FTP-DATA并追踪其TCP流，将显示和保存数据为“原始数据”并导出为zip文件，即可得到加密zip文件。<br>
+这里使用ziperello软件进行暴力破解，得到密码为123456.<br>
+<img src="https://img-blog.csdnimg.cn/20201115200810395.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="3.4" loading="lazy"></p>
+<p>以下就是加密zip文件中的图片。<br>
+<img src="https://img-blog.csdnimg.cn/20201114114001253.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="3-1" loading="lazy"></p>
+<h3 id="35-txt文件的内容是什么">3.5 TXT文件的内容是什么？</h3>
+<figure data-type="image" tabindex="4"><img src="https://img-blog.csdnimg.cn/20201114112349836.png#pic_center" alt="3.5" loading="lazy"></figure>
+<center>真·复习题</center>
+<h2 id="4md5破解">4.MD5破解</h2>
+<p>SqlMap得到某数据库用户表信息，用户口令的MD5值为7282C5050CFE7DF5E09A33CA456B94AE<br>
+那么，口令的明文是什么？（提示：MD5值破解）<br>
+<img src="https://img-blog.csdnimg.cn/202011141122338.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70#pic_center" alt="iampotato" loading="lazy"></p>
+<p>iampotato🥔</p>
+<h2 id="5john-the-ripper的作用是什么">5.John the Ripper的作用是什么？</h2>
+<p>一个工具软件，用于在已知密文的情况下尝试破解出明文的破解密码软件。</p>
+<h1 id="思考问题">思考问题：</h1>
+<h2 id="1谈谈如何防止arp攻击">1.谈谈如何防止ARP攻击。</h2>
+<p>不浏览不安全网址。<br>
+及时修补系统漏洞。<br>
+安装防火墙和杀毒软件。<br>
+双绑，在路由器和终端上都进行IP-MAC绑定的措施。</p>
+<h2 id="2安全的密码口令应遵循的原则">2.安全的密码（口令）应遵循的原则。</h2>
+<p>严禁使用空口令和与自用户名相同的口令；<br>
+不要选择可以在任何字典或语言中找到的口令；<br>
+不要选择简单字母组成的口令；<br>
+不要选择任何和个人信息有关的口令；<br>
+不要选择短于6个字符或仅包含字母或数字；<br>
+不要选择作为口令范例公布的口令；<br>
+采取数字混合并且易于记忆。</p>
+<h2 id="3谈谈字典攻击中字典的重要性">3.谈谈字典攻击中字典的重要性。</h2>
+<p>字典相当于一串钥匙，可以一把一把的试，能打开门的钥匙有可能就在其中。</p>
+<h2 id="4实验小结">4.实验小结。</h2>
+<p>本实验可以应用到：<br>
+1.WireShark抓包及分析<br>
+2.arp欺骗<br>
+3.字典攻击<br>
+4.MD5破解<br>
+本次实验难度比上次稍难，尤其对arp相关的操作还相当生疏。</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#%E7%BD%91%E7%BB%9C%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E9%AA%8C%E4%BA%8C%E7%BD%91%E7%BB%9C%E5%97%85%E6%8E%A2%E4%B8%8E%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81">网络渗透测试实验二——网络嗅探与身份认证</a>
+<ul>
+<li><a href="#%E5%AE%9E%E9%AA%8C%E7%9B%AE%E7%9A%84">实验目的：</a></li>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83">系统环境</a></li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E7%8E%AF%E5%A2%83">网络环境</a></li>
+<li><a href="#%E5%AE%9E%E9%AA%8C%E5%B7%A5%E5%85%B7">实验工具</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AE%9E%E9%AA%8C%E6%AD%A5%E9%AA%A4%E5%92%8C%E5%86%85%E5%AE%B9">实验步骤和内容</a>
+<ul>
+<li><a href="#%E7%BD%91%E7%BB%9C%E5%97%85%E6%8E%A2%E9%83%A8%E5%88%86">网络嗅探部分：</a></li>
+<li><a href="#1a%E4%B8%BB%E6%9C%BA%E4%B8%8A%E5%A4%96%E7%BD%91b%E8%BF%90%E8%A1%8Csinfferwireshark%E9%80%89%E5%AE%9A%E5%8F%AA%E6%8A%93%E6%BA%90%E4%B8%BAa%E7%9A%84%E6%95%B0%E6%8D%AE">1.A主机上外网，B运行sinffer(Wireshark)选定只抓源为A的数据)。</a>
+<ul>
+<li><a href="#11-%E5%86%99%E5%87%BA%E4%BB%A5%E4%B8%8A%E8%BF%87%E6%BB%A4%E8%AF%AD%E5%8F%A5">1.1 写出以上过滤语句。</a></li>
+<li><a href="#12-b%E6%98%AF%E5%90%A6%E8%83%BD%E7%9C%8B%E5%88%B0a%E5%92%8C%E5%A4%96%E7%BD%91%E7%9A%84%E9%80%9A%E4%BF%A1a%E5%88%9A%E8%BE%93%E5%85%A5%E7%9A%84%E5%B8%90%E6%88%B7%E5%92%8C%E5%8F%A3%E4%BB%A4%E4%B8%BA%E4%BB%80%E4%B9%88">1.2 B是否能看到A和外网的通信（A刚输入的帐户和口令）？为什么？</a></li>
+</ul>
+</li>
+<li><a href="#2">2.</a>
+<ul>
+<li><a href="#21-%E4%B8%BA%E4%BA%86%E6%8D%95%E8%8E%B7a%E5%88%B0%E5%A4%96%E7%BD%91%E7%9A%84%E6%95%B0%E6%8D%AEb%E5%AE%9E%E6%96%BDarp%E6%AC%BA%E9%AA%97%E6%94%BB%E5%87%BBb%E5%B0%86%E5%86%92%E5%85%85%E8%AF%A5%E5%AD%90%E7%BD%91%E7%9A%84%E4%BB%80%E4%B9%88%E5%AE%9E%E4%BD%93">2.1 为了捕获A到外网的数据，B实施ARP欺骗攻击，B将冒充该子网的什么实体？</a></li>
+<li><a href="#22-%E5%86%99%E5%87%BAarpspoof%E5%91%BD%E4%BB%A4%E6%A0%BC%E5%BC%8F">2.2 写出arpspoof命令格式。</a></li>
+<li><a href="#23-b%E6%98%AF%E5%90%A6%E8%83%BD%E7%9C%8B%E5%88%B0a%E5%92%8C%E5%A4%96%E7%BD%91%E7%9A%84%E9%80%9A%E4%BF%A1a%E5%88%9A%E8%BE%93%E5%85%A5%E7%9A%84%E5%B8%90%E6%88%B7%E5%92%8C%E5%8F%A3%E4%BB%A4">2.3 B是否能看到A和外网的通信（A刚输入的帐户和口令）？</a></li>
+<li><a href="#24-%E5%9C%A8%E4%BA%92%E8%81%94%E7%BD%91%E4%B8%8A%E6%89%BE%E5%88%B0%E4%BB%BB%E6%84%8F%E4%B8%80%E4%B8%AA%E4%BB%A5%E6%98%8E%E6%96%87%E6%96%B9%E5%BC%8F%E4%BC%A0%E9%80%92%E7%94%A8%E6%88%B7%E5%B8%90%E5%8F%B7-%E5%AF%86%E7%A0%81%E7%9A%84%E7%BD%91%E7%AB%99%E6%88%AA%E5%9B%BEwireshark%E4%B8%AD%E6%98%BE%E7%A4%BA%E7%9A%84%E6%98%8E%E6%96%87%E4%BF%A1%E6%81%AF">2.4 在互联网上找到任意一个以明文方式传递用户帐号、密码的网站，截图Wireshark中显示的明文信息。</a></li>
+</ul>
+</li>
+<li><a href="#3-ftp%E6%95%B0%E6%8D%AE%E8%BF%98%E5%8E%9F%E9%83%A8%E5%88%86%E5%88%A9%E7%94%A8wireshark%E6%89%93%E5%BC%80%E5%AE%9E%E9%AA%8C%E5%AE%9E%E9%AA%8C%E6%95%B0%E6%8D%AEdatapcapng">3. FTP数据还原部分：利用WireShark打开实验实验数据data.pcapng。</a>
+<ul>
+<li><a href="#31-ftp%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84ip%E5%9C%B0%E5%9D%80%E6%98%AF%E5%A4%9A%E5%B0%91%E4%BD%A0%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%91%E7%8E%B0%E5%85%B6%E4%B8%BAftp%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84">3.1 FTP服务器的IP地址是多少？你是如何发现其为FTP服务器的？</a></li>
+<li><a href="#32%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%99%BB%E5%BD%95ftp%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E8%B4%A6%E5%8F%B7%E5%92%8C%E5%AF%86%E7%A0%81%E5%88%86%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88">3.2客户端登录FTP服务器的账号和密码分别是什么?</a></li>
+<li><a href="#33-%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%8Eftp%E4%B8%8B%E8%BD%BD%E6%88%96%E6%9F%A5%E7%9C%8B%E4%BA%862%E4%B8%AA%E6%96%87%E4%BB%B6%E4%B8%80%E4%B8%AA%E4%B8%BAzip%E6%96%87%E4%BB%B6%E4%B8%80%E4%B8%AA%E4%B8%BAtxt%E6%96%87%E4%BB%B6%E6%96%87%E4%BB%B6%E5%90%8D%E5%88%86%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88%E6%8F%90%E7%A4%BA%E6%96%87%E4%BB%B6%E5%90%8D%E6%9C%89%E5%8F%AF%E8%83%BD%E6%98%AF%E4%B8%AD%E6%96%87">3.3 客户端从FTP下载或查看了2个文件，一个为ZIP文件，一个为TXT文件，文件名分别是什么？提示：文件名有可能是中文。</a></li>
+<li><a href="#34-%E8%BF%98%E5%8E%9Fzip%E6%96%87%E4%BB%B6%E5%B9%B6%E6%89%93%E5%BC%80zip%E6%9C%89%E8%A7%A3%E5%8E%8B%E5%AF%86%E7%A0%81%E8%AF%95%E5%9B%BE%E7%A0%B4%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%AF%86%E7%A0%81%E5%85%A8%E4%B8%BA%E6%95%B0%E5%AD%97%E5%B9%B6%E4%B8%BA6%E4%BD%8D-%E6%88%AA%E5%9B%BE%E7%A0%B4%E8%A7%A3%E8%BF%87%E7%A8%8B">3.4 还原ZIP文件并打开（ZIP有解压密码，试图破解，提示：密码全为数字，并为6位）。截图破解过程。</a></li>
+<li><a href="#35-txt%E6%96%87%E4%BB%B6%E7%9A%84%E5%86%85%E5%AE%B9%E6%98%AF%E4%BB%80%E4%B9%88">3.5 TXT文件的内容是什么？</a></li>
+</ul>
+</li>
+<li><a href="#4md5%E7%A0%B4%E8%A7%A3">4.MD5破解</a></li>
+<li><a href="#5john-the-ripper%E7%9A%84%E4%BD%9C%E7%94%A8%E6%98%AF%E4%BB%80%E4%B9%88">5.John the Ripper的作用是什么？</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%9D%E8%80%83%E9%97%AE%E9%A2%98">思考问题：</a>
+<ul>
+<li><a href="#1%E8%B0%88%E8%B0%88%E5%A6%82%E4%BD%95%E9%98%B2%E6%AD%A2arp%E6%94%BB%E5%87%BB">1.谈谈如何防止ARP攻击。</a></li>
+<li><a href="#2%E5%AE%89%E5%85%A8%E7%9A%84%E5%AF%86%E7%A0%81%E5%8F%A3%E4%BB%A4%E5%BA%94%E9%81%B5%E5%BE%AA%E7%9A%84%E5%8E%9F%E5%88%99">2.安全的密码（口令）应遵循的原则。</a></li>
+<li><a href="#3%E8%B0%88%E8%B0%88%E5%AD%97%E5%85%B8%E6%94%BB%E5%87%BB%E4%B8%AD%E5%AD%97%E5%85%B8%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7">3.谈谈字典攻击中字典的重要性。</a></li>
+<li><a href="#4%E5%AE%9E%E9%AA%8C%E5%B0%8F%E7%BB%93">4.实验小结。</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://1900301430.github.io/post/wang-luo-shen-tou-ce-shi-shi-yan-yi-wang-luo-sao-miao-yu-wang-luo-zhen-cha/">
+              <h3 class="post-title">
+                网络渗透测试实验一——网络扫描与网络侦察
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://1900301430.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
